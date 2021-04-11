@@ -8,6 +8,8 @@ namespace Game
     public class Enemy : MonoBehaviour
     {
         [SerializeField] private KnightControl _knightControl;
+        [SerializeField] private AudioSource _deathAudio;
+        [SerializeField] private ParticleSystem _resParticle;
 
         [SerializeField] private float _resTime = 5f;
         [SerializeField] private float _hitTime = 0.5f;
@@ -31,6 +33,7 @@ namespace Game
             _knightControl.death();
             IsDeath = true;
 
+            _deathAudio.Play();
             _stateTween.Kill(false);
 
             DOVirtual.DelayedCall(_resTime, Revive);
@@ -42,6 +45,7 @@ namespace Game
             IsDeath = false;
             gameObject.SetActive(true);
             _hp = _startHP;
+            _resParticle?.Play();
 
             _stateTween.Kill(false);
 

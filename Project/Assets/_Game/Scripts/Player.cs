@@ -13,6 +13,9 @@ namespace Game
         [SerializeField] private LayerMask _layerMask;
         [SerializeField] private UIController _ui;
 
+        [SerializeField] private AudioSource _swordAttack;
+        [SerializeField] private AudioSource _shieldAttack;
+
         [SerializeField] private float _hitDistance = 1.5f;
 
         [SerializeField] private float _speed;
@@ -28,6 +31,7 @@ namespace Game
         private void Start()
         {
             _currentState = State.Idle;
+            _kills = PlayerPrefs.GetInt("Kills");
             _ui.SetKills(_kills);
         }
 
@@ -63,14 +67,12 @@ namespace Game
         {
             _rigidbody.MovePosition(transform.position + (Time.fixedDeltaTime * _speed * direction));
 
-            transform.rotation = (direction.x > 0f) ? (Quaternion.Euler(Vector3.zero)) : (Quaternion.Euler(Vector3.up * 180f));
+            _knightControl.transform.rotation = (direction.x > 0f) ? (Quaternion.Euler(Vector3.zero)) : (Quaternion.Euler(Vector3.up * 180f));
         }
 
         private void Attack(AttakMode mode)
         {
-
-
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.forward, _hitDistance, _layerMask);
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, _knightControl.transform.forward, _hitDistance, _layerMask);
             if (hit)
             {
                 var enemy = hit.collider.gameObject.GetComponent<Enemy>();
@@ -88,6 +90,7 @@ namespace Game
                 if (enemy.IsDeath)
                 {
                     _kills++;
+                    PlayerPrefs.SetInt("Kills", _kills);
                     _ui.SetKills(_kills);
                 }
             }
@@ -109,6 +112,7 @@ namespace Game
             _currentState = State.Attack;
 
             _knightControl.attack_2();
+            _swordAttack.Play();
             DOVirtual.DelayedCall(_delayTimeForHit, () => Attack(AttakMode.SwordAttack));
         }
 
@@ -120,6 +124,7 @@ namespace Game
             _currentState = State.Attack;
 
             _knightControl.attack_1();
+            _shieldAttack.Play();
             DOVirtual.DelayedCall(_delayTimeForHit, () => Attack(AttakMode.ShieldAttack));
         }
 
