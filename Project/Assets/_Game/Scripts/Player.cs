@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using Unity.RemoteConfig;
 
 namespace Game
 {
@@ -28,6 +29,17 @@ namespace Game
         private State _currentState;
 
         #region UnityMethods
+        private void Awake()
+        {
+            ConfigManager.FetchCompleted += OnConfigsFetched;
+            ConfigManager.FetchConfigs(new UserAttributes(), new AppAttributes());
+        }
+
+        private void OnConfigsFetched(ConfigResponse response)
+        {
+            _speed = ConfigManager.appConfig.GetFloat("Speed");
+        }
+
         private void Start()
         {
             _currentState = State.Idle;
@@ -92,6 +104,8 @@ namespace Game
                     _kills++;
                     PlayerPrefs.SetInt("Kills", _kills);
                     _ui.SetKills(_kills);
+
+                    UnityAnalytics.Instance.OnPlayerKillEvent(_kills);
                 }
             }
 
@@ -161,4 +175,7 @@ namespace Game
         }
         #endregion
     }
+
+    public struct UserAttributes { }
+    public struct AppAttributes { }
 }
